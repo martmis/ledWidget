@@ -1,4 +1,5 @@
 import sys
+from math import sqrt, pow
 from PyQt5.QtWidgets import *
 from PyQt5.QtGui import *
 from PyQt5.QtCore import *
@@ -11,14 +12,11 @@ class LedMarti(QWidget):
         self.setGeometry(100, 100, 400, 300)
         self.setWindowTitle('Widget')
         self.ledIsOn = False
-        self.button = QPushButton()
         self.initUI()
 
     def initUI(self):
         self.radius = 50
-        self.button = QPushButton('pressme', self)
-        self.button.setCheckable(True)
-        self.button.clicked.connect(self.on_click)
+        self.center = QPoint(100,50)
         self.show()
 
     def on_click(self):
@@ -28,24 +26,21 @@ class LedMarti(QWidget):
             self.ledIsOn = False
         self.repaint()
 
+    # y goes down lol
     def mousePressEvent(self, event):
         x = int(event.x())
         y = int(event.y())
 
+        cx = self.center.x() + 0.5*self.radius
+        cy = self.center.y() + 0.5*self.radius
 
-        x_area_max = 50 + self.radius
-        x_area_min = 50 - self.radius
-        y_area_max = 100 + self.radius
-        y_area_min = 100 - self.radius
+        # some calculations, move them to new method
+        dist = sqrt(pow((x - cx),2)+ pow((y-cy),2))
 
-        if x <= x_area_max and x >= x_area_min:
-            if y <= y_area_max and y >= y_area_min:
-                print(x)
-                print(y)
-                print('end')
+        if dist < 0.5*self.radius:
+            self.on_click()
 
-
-    # radius can't be less than zero (absolute position of the widget, and can't be bigger than any of the dim
+    # radius can't be less than zero (absolute position of the widget, and can't be bigger than any of the dim)
     def resizeEvent(self, QResizeEvent):
         old_width = QResizeEvent.oldSize().width()
         old_height = QResizeEvent.oldSize().height()
@@ -81,13 +76,20 @@ class LedMarti(QWidget):
         qp = QPainter()
         qp.begin(self)
         if self.ledIsOn is False:
-            qp.setPen(Qt.SolidLine)
-            qp.setBrush(Qt.red)
-            qp.drawEllipse(100, 50, self.radius, self.radius)
+            qp.setPen(QPen(Qt.darkRed, 2, Qt.SolidLine))
+            brush = QBrush()
+            brush.setColor(Qt.red)
+            brush.setStyle(Qt.Dense3Pattern)
+            qp.setBrush(brush)
+            qp.drawEllipse(self.center.x(), self.center.y(), self.radius, self.radius)
+
         else:
-            qp.setPen(QColor(Qt.black))
-            qp.setBrush(Qt.darkGreen)
-            qp.drawEllipse(100, 50, self.radius, self.radius)
+            qp.setPen(QPen(Qt.darkGreen, 2, Qt.SolidLine))
+            brush = QBrush()
+            brush.setColor(Qt.green)
+            brush.setStyle(Qt.Dense3Pattern)
+            qp.setBrush(brush)
+            qp.drawEllipse(self.center.x(), self.center.y(), self.radius, self.radius)
         qp.end()
 
 
